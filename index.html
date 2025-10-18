@@ -134,7 +134,6 @@
             }
 
             // === 1. PRONUNCIATION DATA & LOGIC ===
-            // **FIXED: All 20 mistakes are now included**
             const pronunciationData = [
                 {
                     "correct": "Tomaatti",
@@ -373,7 +372,6 @@
             });
 
             // === 3. DICTATION DATA & LOGIC ===
-            // **FIXED: Data is now included**
             const dictationData = [
                 {
                     "correct": "Minä ostan omenan",
@@ -423,8 +421,10 @@
             });
 
             dictationCheckBtn.addEventListener('click', () => { 
-                const userInput = dictationInput..value.toLowerCase().trim().replace(/[.,!?]/g, '');
+                // **FIX #1: Removed the extra dot**
+                const userInput = dictationInput.value.toLowerCase().trim().replace(/[.,!?]/g, '');
                 const correctText = currentDictationPhrase.correct.toLowerCase().trim().replace(/[.,!?]/g, '');
+                
                 dictationNextBtn.style.display = 'inline-block';
                 if (userInput === correctText) {
                     dictationFeedback.innerHTML = `Täydellistä! (Perfect!)<br><strong>Correct:</strong> ${currentDictationPhrase.correct}`;
@@ -453,7 +453,6 @@
             });
 
             // === 4. SENTENCE COMPLETION LOGIC ===
-            // **FIXED: Data is now included**
             const sentenceData = [
                 {
                     prompt_en: "I am buying an <strong>apple</strong>.",
@@ -489,7 +488,8 @@
             const sentencePromptFi = document.getElementById('sentence-prompt-fi');
             const sentenceInput = document.getElementById('sentence-input');
             const sentenceCheckBtn = document.getElementById('sentence-check-btn');
-            const sentenceFeedback = document.getElementById('feedback-feedback');
+            // **FIX #2: Corrected the ID name**
+            const sentenceFeedback = document.getElementById('sentence-feedback'); 
 
             let currentSentenceIndex = 0;
 
