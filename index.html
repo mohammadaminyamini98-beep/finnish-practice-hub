@@ -43,7 +43,7 @@
         #dictation-check-btn:hover { background-color: #2f855a; }
         #dictation-next-btn { background-color: #4a5568; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: none; margin-top: 10px; float: right;}
 
-        /* --- 3. Sentence Completion Styling (NEW) --- */
+        /* --- 3. Sentence Completion Styling --- */
         #sentence-prompt-en { font-size: 1.1rem; color: #4a5568; text-align: center; margin-bottom: 20px; }
         .sentence-build-line { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
         #sentence-prompt-fi { font-size: 1.2rem; color: #2d3748; font-weight: 600; }
@@ -109,29 +109,24 @@
             </div>
             <div class="accordion-content" id="sentence-content">
                 <p>Complete the Finnish sentence. Fill in the blank!</p>
-                
                 <p id="sentence-prompt-en">I am buying an <strong>apple</strong>.</p>
-                
                 <div class="sentence-build-line">
                     <span id="sentence-prompt-fi">Minä ostan</span>
                     <input type="text" id="sentence-input" placeholder="...">
                     <span>.</span>
                 </div>
-
                 <button id="sentence-check-btn">Check Answer</button>
-
                 <div id="sentence-feedback" class="feedback"></div>
             </div>
         </div>
 
     </div>
 
-   <script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             // === 0. SHARED FUNCTION ===
             function speakFinnish(phrase) {
-                // Cancel any previous speech to prevent overlap
                 window.speechSynthesis.cancel(); 
                 const utterance = new SpeechSynthesisUtterance(phrase);
                 utterance.lang = 'fi-FI';
@@ -139,11 +134,112 @@
             }
 
             // === 1. PRONUNCIATION DATA & LOGIC ===
+            // **FIXED: All 20 mistakes are now included**
             const pronunciationData = [
-                { "correct": "Tomaatti", "translation": "Tomato", "mistakes": { "tomati": "So close!", "domaatti": "Good try!", "tomaati": "Almost there!", "tomaatto": "Great pronunciation!", "tomatti": "You got the double 'tt' perfect!", "tomatit": "That's the plural form, 'tomatoes'!", "tomaattia": "Excellent! That's the partitive case.", "tomaatin": "Spot on! That's the genitive case.", "tomaatissa": "Perfect grammar!", "timantti": "That's a different word! 'Timantti' means 'diamond'.", "tuomari": "That sounds like 'tuomari', which means 'judge'.", "toomatti": "Careful with which vowel you lengthen!", "tomaat": "You're so close, don't forget the ending!", "tomaatte": "You got the rhythm right!", "tomattiin": "Another perfect grammatical form!", "taamotti": "It sounds like the sounds are swapped around.", "tomayto": "That sounds like the English pronunciation.", "somaatti": "Almost! The first sound is a 'T'.", "tomasky": "An interesting try!", "matto": "That's another Finnish word, 'matto'." } },
-                { "correct": "Omena", "translation": "Apple", "mistakes": { "amena": "Almost!", "omina": "Very close!", "omeno": "You've got the beginning perfect!", "omenaa": "This is a correct form!", "omenat": "You said 'apples' (plural)!", "ommena": "Great try! The 'm' sound is single.", "onnena": "That sounds like 'onnena'.", "oomena": "Careful! The 'o' is short.", "omela": "So close! The middle consonant is 'n'.", "omana": "That's a real word!", "omen": "That's the English word 'omen'.", "omenan": "Perfect genitive case!", "omenassa": "Flawless grammar!", "umena": "Good effort! The first sound is 'o'.", "omenaiva": "That's a creative guess!", "onema": "The 'm' and 'n' are switched!", "omenae": "A classic English speaker mistake!", "emona": "You missed the first letter!", "omppu": "Aha! You found the slang word!", "ihana": "That means 'wonderful'!" } },
-                { "correct": "Porkkana", "translation": "Carrot", "mistakes": { "porkana": "Great effort!", "borkkana": "You're almost there!", "purkkana": "Watch out for that first vowel!", "porkkanna": "So close! The 'n' is single.", "pokkana": "You missed the 'r' sound!", "poro": "Close start! 'poro' means reindeer!", "kana": "You said the last part! 'Kana' means 'chicken'.", "porkkanat": "Perfect plural!", "porkkanaa": "Excellent partitive case!", "porkkanan": "You said 'carrot's'.", "poorkkana": "The 'o' sound is short.", "porkkala": "Watch out for the last consonant!", "porgana": "This is a double mistake!", "parkkana": "It sounds like 'parka'.", "kurkkuna": "Tricky! That means 'as a cucumber'.", "peruna": "That's 'potato'!", "porkkana in": "It sounds like you're adding an English word.", "gorggala": "Let's work on the sounds.", "porgand": "That's Estonian!", "morot": "That means 'hi'!" } },
-                { "correct": "Vesimeloni", "translation": "Watermelon", "mistakes": { "vesimeloni": "That's it! Perfect!", "vesimelon": "You got all the hard parts!", "visimeloni": "Excellent try! The first vowel is 'e'.", "wesimeloni": "You're saying it beautifully!", "meloni": "You got half of it! 'Meloni' is 'melon'.", "vesi": "That's the first part, 'water'.", "vesimelonia": "Perfect grammar!", "vesimelonit": "You said 'watermelons' (plural)!", "melonivesi": "A clever guess! Wrong order.", "vesimelooni": "Careful with the length!", "vesimelona": "Almost! The word ends with 'i'.", "vasimeloni": "So close! It's 've', not 'va'.", "vesimelone": "The ending should be a sharp 'i'.", "fesimeloni": "Good try! It's a 'v' sound.", "vesimelonin": "You've got the genitive case.", "vesimeloniassa": "That's an interesting combination.", "vesimelo": "You started strong but didn't finish!", "vesimuna": "That's a funny mix! 'Water-egg'!", "siemen": "That means 'seed'!", "vesimeloniemi": "A creative ending!" } }
+                {
+                    "correct": "Tomaatti",
+                    "translation": "Tomato",
+                    "mistakes": {
+                        "tomati": "So close! You missed the long 'aa' and the double 'tt'. In Finnish, hold those sounds a bit longer. To-maaat-ti.",
+                        "domaatti": "Good try! Remember the first letter makes a sharp 'T' sound, not a soft 'D' sound.",
+                        "tomaati": "Almost there! The double 'tt' in the middle should be a quick, sharp stop. Try to pause for a split second. To-maat-ti.",
+                        "tomaatto": "Great pronunciation! Just be careful with the ending. It finishes with a clean 'i' sound, not 'o'.",
+                        "tomatti": "You got the double 'tt' perfect! Now just lengthen the 'a' sound before it: To-maaa-tti.",
+                        "tomatit": "That's the plural form, 'tomatoes'! You said it perfectly. For just one 'tomato', the word is 'Tomaatti'.",
+                        "tomaattia": "Excellent! That's the partitive case, used when you're eating a tomato. The basic word is 'Tomaatti'.",
+                        "tomaatin": "Spot on! That's the genitive case, meaning 'tomato's'. To just say 'tomato', it's 'Tomaatti'.",
+                        "tomaatissa": "Perfect grammar! That means 'in the tomato'. The basic noun is 'Tomaatti'.",
+                        "timantti": "That's a different word! 'Timantti' means 'diamond'. They sound similar, but for 'tomato', the first vowel is 'o'. To-maa-tti.",
+                        "tuomari": "That sounds like 'tuomari', which means 'judge'. A very different thing! Focus on the 'To-maa' start.",
+                        "toomatti": "Careful with which vowel you lengthen! The 'o' is short, but the 'a' is long. Try: To-maatti.",
+                        "tomaat": "You're so close, don't forget the ending! It needs a '-ti' at the end. Tomaat-ti.",
+                        "tomaatte": "You got the rhythm right! Just the last vowel is off. It should be a clear 'i' sound, like in 'ski'.",
+                        "tomattiin": "Another perfect grammatical form! That means 'into the tomato'. The base word is 'Tomaatti'.",
+                        "taamotti": "It sounds like the sounds are swapped around. The order is T-O-M-A-A-T-T-I.",
+                        "tomayto": "That sounds like the English pronunciation. In Finnish, every letter gets a clear, distinct sound. To-ma-at-ti.",
+                        "somaatti": "Almost! The first sound is a 'T', not an 'S'. It's a hard tap of the tongue behind your teeth.",
+                        "tomasky": "An interesting try! The ending is a simple '-aatti'. Let's try it again: To-ma-at-ti.",
+                        "matto": "That's another Finnish word, 'matto' for 'rug' or 'mat'. 'Tomaatti' is much longer!"
+                    }
+                },
+                {
+                    "correct": "Omena",
+                    "translation": "Apple",
+                    "mistakes": {
+                        "amena": "Almost! Make sure you start with a clear 'O' sound, like in the word 'open'.",
+                        "omina": "Very close! The middle vowel is 'e' (like in 'egg'), not 'i'. Try: O-me-na.",
+                        "omeno": "You've got the beginning perfect! The word ends with an 'a' sound, like the 'a' in 'father'. O-me-na.",
+                        "omenaa": "This is a correct form called the partitive! You'd use it to say 'I'm eating an apple'. For 'an apple', it's just 'Omena'.",
+                        "omenat": "You said 'apples' (plural)! Perfect pronunciation. For the singular 'apple', just say 'Omena'.",
+                        "ommena": "Great try! The 'm' sound is single and quick, not held. O-me-na.",
+                        "onnena": "That sounds like 'onnena', which means 'as happiness'. For 'apple', use a soft 'm' sound: O-me-na.",
+                        "oomena": "Careful! The 'o' at the beginning is short and sharp. It's O-mena, not OO-mena.",
+                        "omela": "So close! The middle consonant is an 'n' sound, not an 'l'. O-me-na.",
+                        "omana": "That's a real word meaning 'as one's own'! For 'apple', the middle sound is 'me', not 'ma'. O-me-na.",
+                        "omen": "That's the English word 'omen'. The Finnish word needs an 'a' at the end: O-me-na.",
+                        "omenan": "Perfect genitive case! That means 'apple's'. The basic word is just 'Omena'.",
+                        "omenassa": "Flawless grammar! That means 'in the apple'. The standalone word is 'Omena'.",
+                        "umena": "Good effort! The first sound is 'o', not 'u'. Try to make your lips a round 'O' shape.",
+                        "omenaiva": "That's a creative guess! The word is simpler, just three syllables: O-me-na.",
+                        "onema": "The 'm' and 'n' are switched! Try it this way: O-me-na.",
+                        "omenae": "A classic English speaker mistake! In Finnish, 'a' at the end is always a clean 'ah' sound, never 'ay' or 'ae'.",
+                        "emona": "You missed the first letter! It starts with a clear 'O'.",
+                        "omppu": "Aha! You found the common slang word for apple! That's correct informally. The standard word is 'Omena'.",
+                        "ihana": "That means 'wonderful'! It has a similar rhythm, but the word for apple is 'Omena'."
+                    }
+                },
+                {
+                    "correct": "Porkkana",
+                    "translation": "Carrot",
+                    "mistakes": {
+                        "porkana": "Great effort! In the middle, the double 'kk' needs a stronger, sharper sound. Try: Pork-ka-na.",
+                        "borkkana": "You're almost there! The first sound is a 'P', not a 'B'. Make a little puff of air when you say it.",
+                        "purkkana": "Watch out for that first vowel! It's an 'o' sound, like in 'more'. Keep your lips rounded. Pork-ka-na.",
+                        "porkkanna": "So close! The double consonant is 'kk' in the middle. The 'n' at the end is single. Pork-ka-na.",
+                        "pokkana": "You missed the 'r' sound! Make sure you get that little roll in there after the 'o'. Por-kka-na.",
+                        "poro": "Close start! But 'poro' means reindeer! To say 'carrot', you need to add the '-kkana' part.",
+                        "kana": "You said the last part! 'Kana' means 'chicken'. The whole word for carrot is 'Porkkana'.",
+                        "porkkanat": "Perfect plural! That means 'carrots'. For a single carrot, it's 'Porkkana'.",
+                        "porkkanaa": "Excellent partitive case! Used when you're nibbling on a carrot. The base word is 'Porkkana'.",
+                        "porkkanan": "You said 'carrot's', the genitive case. Flawless! The simple noun is 'Porkkana'.",
+                        "poorkkana": "The 'o' sound is short and quick. It's Por-kkana, not Poor-kkana.",
+                        "porkkala": "Watch out for the last consonant! It's an 'n', not an 'l'. Pork-ka-na.",
+                        "porgana": "This is a double mistake! The 'kk' should be a sharp double sound, not a 'g', and the 'n' is single.",
+                        "parkkana": "It sounds like 'parka', which means 'poor thing'. For carrot, it's a clear 'o' sound. Porkkana.",
+                        "kurkkuna": "Tricky! That means 'as a cucumber'. Very similar ending, but the word for carrot is 'Porkkana'.",
+                        "peruna": "That's another vegetable! 'Peruna' is potato. 'Porkkana' is carrot.",
+                        "porkkana in": "It sounds like you're adding an English word. The Finnish word ends with a clean '-na'.",
+                        "gorggala": "Let's work on the sounds. It starts with a 'P', has an 'r' roll, a double 'kk', and ends in '-na'.",
+                        "porgand": "That's 'carrot' in Estonian! Very close language, but in Finnish, it's 'Porkkana'.",
+                        "morot": "That means 'hi' informally and is also the plural of the Swedish word for carrot! In Finnish, it's 'Porkkana'."
+                    }
+                },
+                {
+                    "correct": "Vesimeloni",
+                    "translation": "Watermelon",
+                    "mistakes": {
+                        "vesimeloni": "That's it! Perfect!",
+                        "vesimelon": "You got all the hard parts! Just remember to add the 'i' sound at the very end. Ve-si-me-lo-ni.",
+                        "visimeloni": "Excellent try! The very first vowel is 'e', like in the English word 'vet'. Ve-si-me-lo-ni.",
+                        "wesimeloni": "You're saying it beautifully! For a perfect Finnish 'v', gently touch your top teeth to your bottom lip, like in 'victory'.",
+                        "meloni": "You got half of it! 'Meloni' is just 'melon'. To say 'watermelon', you add the word for water, 'vesi', at the front.",
+                        "vesi": "That's the first part, which means 'water'. Now add the second part: 'meloni'.",
+                        "vesimelonia": "Perfect grammar for saying 'some watermelon'! If you just want to name the fruit, the basic form is 'vesimeloni'.",
+                        "vesimelonit": "You said 'watermelons' (plural)! Perfect pronunciation. For the singular, it's 'vesimeloni'.",
+                        "melonivesi": "A clever guess! You have the right parts, 'vesi' (water) and 'meloni' (melon), but in the wrong order. It's 'Vesimeloni'.",
+                        "vesimelooni": "Careful with the length! All the vowels in 'meloni' are short. Ve-si-me-lo-ni.",
+                        "vesimelona": "Almost at the finish line! The word ends with an 'i' sound, not an 'a'.",
+                        "vasimeloni": "So close! Remember it's a 've' sound, not 'va'. Vesi means water.",
+                        "vesimelone": "The ending should be a sharp 'i' sound, like 'ee' in 'see', but shorter.",
+                        "fesimeloni": "Good try! The 'v' sound is made with the teeth and lip, not an 'f' sound made just with the lip.",
+                        "vesimelonin": "You've got the genitive case, 'watermelon's'! The basic noun is 'vesimeloni'.",
+                        "vesimeloniassa": "That's an interesting combination. The word is 'vesimeloni' and 'in a watermelon' would be 'vesimelonissa'.",
+                        "vesimelo": "You started strong but didn't finish! Don't forget the '-ni' at the end.",
+                        "vesimuna": "That's a funny mix! It sounds like 'vesi' (water) + 'muna' (egg). Water-egg! Remember it's 'meloni', not 'muna'.",
+                        "siemen": "That means 'seed'! I can see why you'd think that. The middle of 'vesimeloni' sounds a bit like it.",
+                        "vesimeloniemi": "A creative ending! The correct word is simpler. It just ends with 'meloni'."
+                    }
+                }
             ];
 
             const wordSelectionContainer = document.getElementById('word-selection');
@@ -193,7 +289,6 @@
                 speakFinnish(currentPronunciationWord.correct); 
             });
 
-            // --- Pronunciation Speech Recognition ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
                 const recognition = new SpeechRecognition();
@@ -267,7 +362,6 @@
                         content.style.display = 'block';
                         header.classList.add('active');
 
-                        // **IMPROVEMENT**: Auto-play audio or focus input when opening a section
                         if (header.dataset.target === '#dictation-content') {
                             speakFinnish(currentDictationPhrase.correct);
                             dictationInput.focus();
@@ -279,6 +373,7 @@
             });
 
             // === 3. DICTATION DATA & LOGIC ===
+            // **FIXED: Data is now included**
             const dictationData = [
                 {
                     "correct": "Minä ostan omenan",
@@ -328,7 +423,7 @@
             });
 
             dictationCheckBtn.addEventListener('click', () => { 
-                const userInput = dictationInput.value.toLowerCase().trim().replace(/[.,!?]/g, '');
+                const userInput = dictationInput..value.toLowerCase().trim().replace(/[.,!?]/g, '');
                 const correctText = currentDictationPhrase.correct.toLowerCase().trim().replace(/[.,!?]/g, '');
                 dictationNextBtn.style.display = 'inline-block';
                 if (userInput === correctText) {
@@ -358,6 +453,7 @@
             });
 
             // === 4. SENTENCE COMPLETION LOGIC ===
+            // **FIXED: Data is now included**
             const sentenceData = [
                 {
                     prompt_en: "I am buying an <strong>apple</strong>.",
@@ -385,8 +481,65 @@
                     prompt_fi_start: "Minä ostan",
                     correct_answer: "vesimelonin",
                     full_sentence_fi: "Minä ostan vesimelonin",
-                    hint: "Nearly there! 'Vesimeloni
+                    hint: "Nearly there! 'Vesimeloni' changes to 'vesimelonin' when you buy it."
+                }
+            ];
+
+            const sentencePromptEn = document.getElementById('sentence-prompt-en');
+            const sentencePromptFi = document.getElementById('sentence-prompt-fi');
+            const sentenceInput = document.getElementById('sentence-input');
+            const sentenceCheckBtn = document.getElementById('sentence-check-btn');
+            const sentenceFeedback = document.getElementById('feedback-feedback');
+
+            let currentSentenceIndex = 0;
+
+            function loadSentence(index) {
+                const currentSentence = sentenceData[index];
+                sentencePromptEn.innerHTML = currentSentence.prompt_en;
+                sentencePromptFi.textContent = currentSentence.prompt_fi_start;
+                sentenceInput.value = '';
+                sentenceFeedback.innerHTML = '';
+                sentenceFeedback.className = 'feedback';
+                sentenceCheckBtn.disabled = false;
+                sentenceInput.disabled = false;
+                sentenceInput.focus();
+            }
+
+            sentenceCheckBtn.addEventListener('click', () => {
+                const userInput = sentenceInput.value.toLowerCase().trim().replace(/[.,!?]/g, '');
+                const currentSentence = sentenceData[currentSentenceIndex];
+                const correctAnswer = currentSentence.correct_answer;
+
+                if (userInput === correctAnswer) {
+                    sentenceFeedback.innerHTML = `Oikein! (Correct!) Listening to the full sentence: <br><strong>${currentSentence.full_sentence_fi}</strong>`;
+                    sentenceFeedback.className = 'feedback correct';
+                    
+                    speakFinnish(currentSentence.full_sentence_fi);
+
+                    sentenceCheckBtn.disabled = true;
+                    sentenceInput.disabled = true;
+
+                    setTimeout(() => {
+                        currentSentenceIndex = (currentSentenceIndex + 1) % sentenceData.length;
+                        loadSentence(currentSentenceIndex);
+                    }, 2500); // Wait 2.5 seconds before loading next
+
+                } else {
+                    sentenceFeedback.innerHTML = `💡 <strong>Hint:</strong> ${currentSentence.hint}`;
+                    sentenceFeedback.className = 'feedback incorrect';
+                }
+            });
+
+            sentenceInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    sentenceCheckBtn.click();
+                }
+            });
+
+            // Load the first sentence
+            loadSentence(currentSentenceIndex);
+        });
+    </script>
 </body>
-
 </html>
-
