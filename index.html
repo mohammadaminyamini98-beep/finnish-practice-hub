@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finnish Practice Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        /* --- General Styling --- */
+        body { background-color: #f0f4f8; color: #1a202c; font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: start; min-height: 100vh; padding: 20px; }
+        .main-container { background-color: #ffffff; padding: 30px 40px; border-radius: 20px; width: 500px; max-width: 100%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+        h1 { color: #2c5282; margin-top: 0; font-size: 1.8rem; text-align: center; }
+
+        /* --- Accordion Styling --- */
+        .accordion-section { margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+        .accordion-header { background-color: #edf2f7; padding: 18px 25px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .accordion-header h2 { margin: 0; font-size: 1.25rem; color: #2d3748; }
+        .accordion-header .icon { font-size: 1.2rem; transition: transform 0.3s ease; }
+        .accordion-header.active .icon { transform: rotate(180deg); }
+        .accordion-content { background: #fafcff; padding: 25px; display: none; border-top: 1px solid #e2e8f0; }
+        
+        /* --- 1. Pronunciation Section Styling --- */
+        .word-selection { margin: 15px 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        .word-btn { background-color: #e2e8f0; border: 2px solid transparent; border-radius: 30px; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
+        .word-btn.active, .word-btn:hover { background-color: #63b3ed; color: white; border-color: #2c5282; }
+        .pronunciation-card { background-color: #edf2f7; padding: 25px; border-radius: 15px; margin: 20px 0; text-align: center; }
+        #word-to-say { font-size: 3rem; margin: 0; color: #2d3748; font-weight: 700; }
+        #translation { color: #718096; margin: 5px 0 0; }
+        .controls { display: flex; justify-content: center; gap: 25px; margin: 25px 0; }
+        .control-btn { background-color: #4a5568; border: none; color: #ffffff; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; }
+        .control-btn:hover { transform: scale(1.1); }
+        #record-btn.recording { background-color: #e53e3e; animation: pulse 1.5s infinite; }
+
+        /* --- 2. Dictation Section Styling --- */
+        .dictation-controls { display: flex; gap: 15px; margin-bottom: 20px; }
+        #dictation-listen-btn { background-color: #3182ce; color: white; font-size: 1.5rem; padding: 15px; border-radius: 50%; width: 60px; height: 60px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.2s; }
+        #dictation-listen-btn:hover { background-color: #2c5282; }
+        #dictation-input { flex-grow: 1; border: 2px solid #cbd5e0; border-radius: 8px; padding: 0 15px; font-size: 1.1rem; font-family: 'Poppins', sans-serif; }
+        #dictation-input:focus { border-color: #63b3ed; outline: none; }
+        #dictation-check-btn { background-color: #38a169; color: white; border: none; border-radius: 8px; padding: 0 25px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+        #dictation-check-btn:hover { background-color: #2f855a; }
+        #dictation-next-btn { background-color: #4a5568; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: none; margin-top: 10px; float: right;}
+
+        /* --- 3. Sentence Completion Styling (NEW) --- */
+        #sentence-prompt-en { font-size: 1.1rem; color: #4a5568; text-align: center; margin-bottom: 20px; }
+        .sentence-build-line { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+        #sentence-prompt-fi { font-size: 1.2rem; color: #2d3748; font-weight: 600; }
+        #sentence-input { border: 2px dashed #cbd5e0; border-radius: 8px; padding: 10px 15px; font-size: 1.1rem; font-family: 'Poppins', sans-serif; text-align: center; width: 150px; }
+        #sentence-input:focus { border-style: solid; border-color: #63b3ed; outline: none; }
+        #sentence-check-btn { background-color: #38a169; color: white; border: none; border-radius: 8px; padding: 12px 25px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: block; width: 100%; }
+        #sentence-check-btn:hover { background-color: #2f855a; }
+
+        /* --- General Feedback Styling --- */
+        .feedback { padding: 12px; border-radius: 8px; font-weight: 600; min-height: 40px; margin-top: 15px; transition: background-color 0.5s; text-align: left;}
+        .feedback.correct { background-color: #c6f6d5; color: #2f855a; }
+        .feedback.incorrect { background-color: #fed7d7; color: #c53030; }
+        .feedback.listening { background-color: #bee3f8; color: #2b6cb0; text-align: center;}
+        
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Finnish Practice Hub</h1>
+        
+        <div class="accordion-section">
+            <div class="accordion-header active" data-target="#pronunciation-content">
+                <h2>1. Pronunciation Practice</h2>
+                <i class="fas fa-chevron-down icon"></i>
+            </div>
+            <div class="accordion-content" id="pronunciation-content" style="display: block;">
+                <p>Choose a word, then say it out loud:</p>
+                <div id="word-selection" class="word-selection"></div>
+                <div class="pronunciation-card">
+                    <h2 id="word-to-say">...</h2>
+                    <p id="translation">...</p>
+                </div>
+                <div class="controls">
+                    <button id="speak-btn" class="control-btn" title="Listen"><i class="fas fa-volume-up"></i></button>
+                    <button id="record-btn" class="control-btn" title="Record your voice"><i class="fas fa-microphone"></i></button>
+                </div>
+                <div id="feedback-message" class="feedback"></div>
+            </div>
+        </div>
+
+        <div class="accordion-section">
+            <div class="accordion-header" data-target="#dictation-content">
+                <h2>2. Dictation Practice</h2>
+                <i class="fas fa-chevron-down icon"></i>
+            </div>
+            <div class="accordion-content" id="dictation-content">
+                <p>Listen to the phrase, then type what you hear:</p>
+                <div class="dictation-controls">
+                    <button id="dictation-listen-btn" title="Listen to Phrase"><i class="fas fa-volume-up"></i></button>
+                    <input type="text" id="dictation-input" placeholder="Type in Finnish...">
+                    <button id="dictation-check-btn">Check</button>
+                </div>
+                <div id="dictation-feedback" class="feedback"></div>
+                <button id="dictation-next-btn">Next Phrase <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="accordion-section">
+            <div class="accordion-header" data-target="#sentence-content">
+                <h2>3. Sentence Completion</h2>
+                <i class="fas fa-chevron-down icon"></i>
+            </div>
+            <div class="accordion-content" id="sentence-content">
+                <p>Complete the Finnish sentence. Fill in the blank!</p>
+                
+                <p id="sentence-prompt-en">I am buying an <strong>apple</strong>.</p>
+                
+                <div class="sentence-build-line">
+                    <span id="sentence-prompt-fi">Minä ostan</span>
+                    <input type="text" id="sentence-input" placeholder="...">
+                    <span>.</span>
+                </div>
+
+                <button id="sentence-check-btn">Check Answer</button>
+
+                <div id="sentence-feedback" class="feedback"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // === 0. SHARED FUNCTION (NEW) ===
+            // Renamed from speakDictation to be more general
+            function speakFinnish(phrase) {
+                const utterance = new SpeechSynthesisUtterance(phrase);
+                utterance.lang = 'fi-FI';
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // === 1. PRONUNCIATION DATA & LOGIC ===
+            const pronunciationData = [
+                // Your 4 word objects with all 20 mistakes go here
+                { "correct": "Tomaatti", "translation": "Tomato", "mistakes": { "tomati": "So close!", "domaatti": "Good try!", /* ...etc */ } },
+                { "correct": "Omena", "translation": "Apple", "mistakes": { "amena": "Almost!", "omina": "Very close!", /* ...etc */ } },
+                { "correct": "Porkkana", "translation": "Carrot", "mistakes": { "porkana": "Great effort!", "borkkana": "You're almost there!", /* ...etc */ } },
+                { "correct": "Vesimeloni", "translation": "Watermelon", "mistakes": { "vesimeloni": "That's it! Perfect!", "vesimelon": "You got all the hard parts!", /* ...etc */ } }
+            ];
+
+            const wordSelectionContainer = document.getElementById('word-selection');
+            const wordToSayElem = document.getElementById('word-to-say');
+            const translationElem = document.getElementById('translation');
+            const speakBtn = document.getElementById('speak-btn');
+            const recordBtn = document.getElementById('record-btn');
+            const feedbackMessageElem = document.getElementById('feedback-message');
+            let currentPronunciationWord = null;
+
+            // Levenshtein Function (for fuzzy matching)
+            const levenshteinDistance = (a, b) => {
+                const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+                for (let i = 0; i <= a.length; i += 1) { matrix[0][i] = i; }
+                for (let j = 0; j <= b.length; j += 1) { matrix[j][0] = j; }
+                for (let j = 1; j <= b.length; j += 1) {
+                    for (let i = 1; i <= a.length; i += 1) {
+                        const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+                        matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + indicator);
+                    }
+                }
+                return matrix[b.length][a.length];
+            };
+            
+            pronunciationData.forEach(wordObj => {
+                const btn = document.createElement('button');
+                btn.className = 'word-btn';
+                btn.textContent = wordObj.correct;
+                btn.onclick = () => selectPronunciationWord(wordObj);
+                wordSelectionContainer.appendChild(btn);
+            });
+
+            function selectPronunciationWord(wordObj) {
+                currentPronunciationWord = wordObj;
+                wordToSayElem.textContent = wordObj.correct;
+                translationElem.textContent = `(English: ${wordObj.translation})`;
+                feedbackMessageElem.innerHTML = '';
+                feedbackMessageElem.className = 'feedback';
+                document.querySelectorAll('.word-btn').forEach(b => {
+                    b.classList.toggle('active', b.textContent === wordObj.correct);
+                });
+            }
+
+            selectPronunciationWord(pronunciationData[0]);
+
+            speakBtn.addEventListener('click', () => {
+                if (!currentPronunciationWord) return;
+                speakFinnish(currentPronunciationWord.correct); // Use shared function
+            });
+
+            // --- Pronunciation Speech Recognition ---
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'fi-FI';
+                recognition.continuous = false;
+                
+                recordBtn.addEventListener('click', () => { /* ... same as before ... */ });
+                recognition.onstart = () => { /* ... same as before ... */ };
+                recognition.onend = () => { /* ... same as before ... */ };
+                recognition.onresult = (event) => { /* ... same fuzzy logic as before ... */ 
+                    const userSaid = event.results[0][0].transcript.toLowerCase().trim().replace(/[.,!?]/g, '');
+                    const correctWord = currentPronunciationWord.correct.toLowerCase();
+                    if (userSaid === correctWord) {
+                        feedbackMessageElem.innerHTML = 'Perfect! You got it exactly right! 🎉';
+                        feedbackMessageElem.className = 'feedback correct';
+                        return;
+                    }
+                    if (currentPronunciationWord.mistakes[userSaid]) {
+                        feedbackMessageElem.innerHTML = `💡 <strong>Tip:</strong> ${currentPronunciationWord.mistakes[userSaid]}`;
+                        feedbackMessageElem.className = 'feedback incorrect';
+                        return;
+                    }
+                    let bestMatch = null, minDistance = 3;
+                    for (const mistake in currentPronunciationWord.mistakes) {
+                        const distance = levenshteinDistance(userSaid, mistake);
+                        if (distance < minDistance) { minDistance = distance; bestMatch = mistake; }
+                    }
+                    if (bestMatch) {
+                        feedbackMessageElem.innerHTML = `💡 <strong>Tip:</strong> That sounded like "<em>${userSaid}</em>". ${currentPronunciationWord.mistakes[bestMatch]}`;
+                    } else {
+                        feedbackMessageElem.innerHTML = `You said "<strong>${userSaid}</strong>". That's not quite right. Listen carefully and try again.`;
+                    }
+                    feedbackMessageElem.className = 'feedback incorrect';
+                };
+                recognition.onerror = (event) => { /* ... same error handling ... */ };
+            } else {
+                alert("Sorry, your browser doesn't support Speech Recognition.");
+                recordBtn.style.display = 'none';
+            }
+
+            // === 2. ACCORDION LOGIC ===
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = document.querySelector(header.dataset.target);
+                    const wasActive = header.classList.contains('active');
+                    
+                    // Close all accordions
+                    document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+
+                    // Toggle the clicked accordion
+                    if (!wasActive) {
+                        content.style.display = 'block';
+                        header.classList.add('active');
+                    }
+                });
+            });
+
+
+            // === 3. DICTATION DATA & LOGIC ===
+            const dictationData = [
+                // Your dictation phrases...
+                { "correct": "Minä ostan omenan", "translation": "I am buying an apple", "mistakes": { /* ... */ } },
+                { "correct": "Yksi tomaatti, kiitos", "translation": "One tomato, please", "mistakes": { /* ... */ } },
+                { "correct": "Missä porkkanat ovat?", "translation": "Where are the carrots?", "mistakes": { /* ... */ } },
+                { "correct": "Vesimeloni on kallis", "translation": "The watermelon is expensive", "mistakes": { /* ... */ } }
+            ];
+
+            const dictationListenBtn = document.getElementById('dictation-listen-btn');
+            const dictationInput = document.getElementById('dictation-input');
+            const dictationCheckBtn = document.getElementById('dictation-check-btn');
+            const dictationFeedback = document.getElementById('dictation-feedback');
+            const dictationNextBtn = document.getElementById('dictation-next-btn');
+
+            let currentDictationIndex = 0;
+            let currentDictationPhrase = dictationData[currentDictationIndex];
+
+            // Speak the first phrase when section is opened (optional, can be moved to accordion click)
+            // speakFinnish(currentDictationPhrase.correct); 
+
+            dictationListenBtn.addEventListener('click', () => {
+                speakFinnish(currentDictationPhrase.correct); // Use shared function
+            });
+
+            dictationCheckBtn.addEventListener('click', () => { /* ... same as before ... */ 
+                const userInput = dictationInput.value.toLowerCase().trim().replace(/[.,!?]/g, '');
+                const correctText = currentDictationPhrase.correct.toLowerCase().trim().replace(/[.,!?]/g, '');
+                dictationNextBtn.style.display = 'inline-block';
+                if (userInput === correctText) {
+                    dictationFeedback.innerHTML = `Täydellistä! (Perfect!)<br><strong>Correct:</strong> ${currentDictationPhrase.correct}`;
+                    dictationFeedback.className = 'feedback correct';
+                } else if (currentDictationPhrase.mistakes[userInput]) {
+                    dictationFeedback.innerHTML = `💡 <strong>Tip:</strong> ${currentDictationPhrase.mistakes[userInput]}`;
+                    dictationFeedback.className = 'feedback incorrect';
+                } else {
+                    dictationFeedback.innerHTML = `You typed "<strong>${dictationInput.value}</strong>".<br><strong>Correct was:</strong> ${currentDictationPhrase.correct}`;
+                    dictationFeedback.className = 'feedback incorrect';
+                }
+            });
+
+            dictationNextBtn.addEventListener('click', () => { /* ... same as before ... */ 
+                currentDictationIndex = (currentDictationIndex + 1) % dictationData.length;
+                currentDictationPhrase = dictationData[currentDictationIndex];
+                dictationInput.value = '';
+                dictationFeedback.innerHTML = '';
+                dictationFeedback.className = 'feedback';
+                dictationNextBtn.style.display = 'none';
+                speakFinnish(currentDictationPhrase.correct); // Use shared function
+            });
+            
+            dictationInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') { event.preventDefault(); dictationCheckBtn.click(); }
+            });
+
+            // === 4. SENTENCE COMPLETION LOGIC (NEW) ===
+            const sentenceData = [
+                {
+                    prompt_en: "I am buying an <strong>apple</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "omenan",
+                    full_sentence_fi: "Minä ostan omenan",
+                    hint: "Good try! When you buy a whole 'omena', it changes to 'omenan' (accusative case)."
+                },
+                {
+                    prompt_en: "I am buying a <strong>tomato</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "tomaatin",
+                    full_sentence_fi: "Minä ostan tomaatin",
+                    hint: "Almost! 'Tomaatti' changes to 'tomaatin' in this sentence."
+                },
+                {
+                    prompt_en: "I am buying a <strong>carrot</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "porkkanan",
+                    full_sentence_fi: "Minä ostan porkkanan",
+                    hint: "Close! 'Porkkana' needs an '-n' at the end here, becoming 'porkkanan'."
+                },
+                {
+                    prompt_en: "I am buying a <strong>watermelon</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "vesimelonin",
+                    full_sentence_fi: "Minä ostan vesimelonin",
+                    hint: "Nearly there! 'Vesimeloni' changes to 'vesimelonin' when you buy it."
+                }
+            ];
+
+            const sentencePromptEn = document.getElementById('sentence-prompt-en');
+            const sentencePromptFi = document.getElementById('sentence-prompt-fi');
+            const sentenceInput = document.getElementById('sentence-input');
+            const sentenceCheckBtn = document.getElementById('sentence-check-btn');
+            const sentenceFeedback = document.getElementById('sentence-feedback');
+
+            let currentSentenceIndex = 0;
+
+            function loadSentence(index) {
+                const currentSentence = sentenceData[index];
+                sentencePromptEn.innerHTML = currentSentence.prompt_en;
+                sentencePromptFi.textContent = currentSentence.prompt_fi_start;
+                sentenceInput.value = '';
+                sentenceFeedback.innerHTML = '';
+                sentenceFeedback.className = 'feedback';
+                sentenceCheckBtn.disabled = false;
+                sentenceInput.disabled = false;
+                sentenceInput.focus();
+            }
+
+            sentenceCheckBtn.addEventListener('click', () => {
+                const userInput = sentenceInput.value.toLowerCase().trim().replace(/[.,!?]/g, '');
+                const currentSentence = sentenceData[currentSentenceIndex];
+                const correctAnswer = currentSentence.correct_answer;
+
+                if (userInput === correctAnswer) {
+                    sentenceFeedback.innerHTML = `Oikein! (Correct!) Listening to the full sentence: <br><strong>${currentSentence.full_sentence_fi}</strong>`;
+                    sentenceFeedback.className = 'feedback correct';
+                    
+                    // Read the full sentence aloud
+                    speakFinnish(currentSentence.full_sentence_fi);
+
+                    // Disable controls and move to next word
+                    sentenceCheckBtn.disabled = true;
+                    sentenceInput.disabled = true;
+
+                    setTimeout(() => {
+                        currentSentenceIndex = (currentSentenceIndex + 1) % sentenceData.length;
+                        loadSentence(currentSentenceIndex);
+                    }, 2500); // Wait 2.5 seconds before loading next
+
+                } else {
+                    // Give a specific hint if wrong
+                    sentenceFeedback.innerHTML = `💡 <strong>Hint:</strong> ${currentSentence.hint}`;
+                    sentenceFeedback.className = 'feedback incorrect';
+                }
+            });
+
+            // Allow pressing 'Enter' to check
+            sentenceInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    sentenceCheckBtn.click();
+                }
+            });
+
+            // Load the first sentence
+            loadSentence(currentSentenceIndex);
+
+        });
+    </script>
+</body>
+</html>
