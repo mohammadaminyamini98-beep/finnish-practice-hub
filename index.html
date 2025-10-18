@@ -127,195 +127,207 @@
     </div>
 
    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        console.log("Page loaded. Script is starting..."); // DEBUG 1
-        
-        // === 0. SHARED FUNCTION ===
-        function speakFinnish(phrase) {
-            const utterance = new SpeechSynthesisUtterance(phrase);
-            utterance.lang = 'fi-FI';
-            window.speechSynthesis.speak(utterance);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
 
-        // === 1. PRONUNCIATION DATA & LOGIC ===
-        const pronunciationData = [
-            // Your 4 word objects with all 20 mistakes go here
-            { "correct": "Tomaatti", "translation": "Tomato", "mistakes": { "tomati": "So close!", "domaatti": "Good try!", "tomaati": "Almost there!", "tomaatto": "Great pronunciation!", "tomatti": "You got the double 'tt' perfect!", "tomatit": "That's the plural form, 'tomatoes'!", "tomaattia": "Excellent! That's the partitive case.", "tomaatin": "Spot on! That's the genitive case.", "tomaatissa": "Perfect grammar!", "timantti": "That's a different word! 'Timantti' means 'diamond'.", "tuomari": "That sounds like 'tuomari', which means 'judge'.", "toomatti": "Careful with which vowel you lengthen!", "tomaat": "You're so close, don't forget the ending!", "tomaatte": "You got the rhythm right!", "tomattiin": "Another perfect grammatical form!", "taamotti": "It sounds like the sounds are swapped around.", "tomayto": "That sounds like the English pronunciation.", "somaatti": "Almost! The first sound is a 'T'.", "tomasky": "An interesting try!", "matto": "That's another Finnish word, 'matto'." } },
-            { "correct": "Omena", "translation": "Apple", "mistakes": { "amena": "Almost!", "omina": "Very close!", "omeno": "You've got the beginning perfect!", "omenaa": "This is a correct form!", "omenat": "You said 'apples' (plural)!", "ommena": "Great try! The 'm' sound is single.", "onnena": "That sounds like 'onnena'.", "oomena": "Careful! The 'o' is short.", "omela": "So close! The middle consonant is 'n'.", "omana": "That's a real word!", "omen": "That's the English word 'omen'.", "omenan": "Perfect genitive case!", "omenassa": "Flawless grammar!", "umena": "Good effort! The first sound is 'o'.", "omenaiva": "That's a creative guess!", "onema": "The 'm' and 'n' are switched!", "omenae": "A classic English speaker mistake!", "emona": "You missed the first letter!", "omppu": "Aha! You found the slang word!", "ihana": "That means 'wonderful'!" } },
-            { "correct": "Porkkana", "translation": "Carrot", "mistakes": { "porkana": "Great effort!", "borkkana": "You're almost there!", "purkkana": "Watch out for that first vowel!", "porkkanna": "So close! The 'n' is single.", "pokkana": "You missed the 'r' sound!", "poro": "Close start! 'poro' means reindeer!", "kana": "You said the last part! 'Kana' means 'chicken'.", "porkkanat": "Perfect plural!", "porkkanaa": "Excellent partitive case!", "porkkanan": "You said 'carrot's'.", "poorkkana": "The 'o' sound is short.", "porkkala": "Watch out for the last consonant!", "porgana": "This is a double mistake!", "parkkana": "It sounds like 'parka'.", "kurkkuna": "Tricky! That means 'as a cucumber'.", "peruna": "That's 'potato'!", "porkkana in": "It sounds like you're adding an English word.", "gorggala": "Let's work on the sounds.", "porgand": "That's Estonian!", "morot": "That means 'hi'!" } },
-            { "correct": "Vesimeloni", "translation": "Watermelon", "mistakes": { "vesimeloni": "That's it! Perfect!", "vesimelon": "You got all the hard parts!", "visimeloni": "Excellent try! The first vowel is 'e'.", "wesimeloni": "You're saying it beautifully!", "meloni": "You got half of it! 'Meloni' is 'melon'.", "vesi": "That's the first part, 'water'.", "vesimelonia": "Perfect grammar!", "vesimelonit": "You said 'watermelons' (plural)!", "melonivesi": "A clever guess! Wrong order.", "vesimelooni": "Careful with the length!", "vesimelona": "Almost! The word ends with 'i'.", "vasimeloni": "So close! It's 've', not 'va'.", "vesimelone": "The ending should be a sharp 'i'.", "fesimeloni": "Good try! It's a 'v' sound.", "vesimelonin": "You've got the genitive case.", "vesimeloniassa": "That's an interesting combination.", "vesimelo": "You started strong but didn't finish!", "vesimuna": "That's a funny mix! 'Water-egg'!", "siemen": "That means 'seed'!", "vesimeloniemi": "A creative ending!" } }
-        ];
-
-        const wordSelectionContainer = document.getElementById('word-selection');
-        const wordToSayElem = document.getElementById('word-to-say');
-        const translationElem = document.getElementById('translation');
-        const speakBtn = document.getElementById('speak-btn');
-        const recordBtn = document.getElementById('record-btn');
-        const feedbackMessageElem = document.getElementById('feedback-message');
-        let currentPronunciationWord = null;
-
-        console.log("Pronunciation elements loaded. 'recordBtn' is:", recordBtn); // DEBUG 2
-        
-        const levenshteinDistance = (a, b) => { /* ... same as before ... */ 
-            const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
-            for (let i = 0; i <= a.length; i += 1) { matrix[0][i] = i; }
-            for (let j = 0; j <= b.length; j += 1) { matrix[j][0] = j; }
-            for (let j = 1; j <= b.length; j += 1) {
-                for (let i = 1; i <= a.length; i += 1) {
-                    const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
-                    matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + indicator);
-                }
+            // === 0. SHARED FUNCTION ===
+            function speakFinnish(phrase) {
+                // Cancel any previous speech to prevent overlap
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(phrase);
+                utterance.lang = 'fi-FI';
+                window.speechSynthesis.speak(utterance);
             }
-            return matrix[b.length][a.length];
-        };
-        
-        pronunciationData.forEach(wordObj => { /* ... same as before ... */ 
-            const btn = document.createElement('button');
-            btn.className = 'word-btn';
-            btn.textContent = wordObj.correct;
-            btn.onclick = () => selectPronunciationWord(wordObj);
-            wordSelectionContainer.appendChild(btn);
-        });
 
-        function selectPronunciationWord(wordObj) { /* ... same as before ... */ 
-            currentPronunciationWord = wordObj;
-            wordToSayElem.textContent = wordObj.correct;
-            translationElem.textContent = `(English: ${wordObj.translation})`;
-            feedbackMessageElem.innerHTML = '';
-            feedbackMessageElem.className = 'feedback';
-            document.querySelectorAll('.word-btn').forEach(b => {
-                b.classList.toggle('active', b.textContent === wordObj.correct);
-            });
-        }
+            // === 1. PRONUNCIATION DATA & LOGIC ===
+            const pronunciationData = [
+                { "correct": "Tomaatti", "translation": "Tomato", "mistakes": { "tomati": "So close!", "domaatti": "Good try!", "tomaati": "Almost there!", "tomaatto": "Great pronunciation!", "tomatti": "You got the double 'tt' perfect!", "tomatit": "That's the plural form, 'tomatoes'!", "tomaattia": "Excellent! That's the partitive case.", "tomaatin": "Spot on! That's the genitive case.", "tomaatissa": "Perfect grammar!", "timantti": "That's a different word! 'Timantti' means 'diamond'.", "tuomari": "That sounds like 'tuomari', which means 'judge'.", "toomatti": "Careful with which vowel you lengthen!", "tomaat": "You're so close, don't forget the ending!", "tomaatte": "You got the rhythm right!", "tomattiin": "Another perfect grammatical form!", "taamotti": "It sounds like the sounds are swapped around.", "tomayto": "That sounds like the English pronunciation.", "somaatti": "Almost! The first sound is a 'T'.", "tomasky": "An interesting try!", "matto": "That's another Finnish word, 'matto'." } },
+                { "correct": "Omena", "translation": "Apple", "mistakes": { "amena": "Almost!", "omina": "Very close!", "omeno": "You've got the beginning perfect!", "omenaa": "This is a correct form!", "omenat": "You said 'apples' (plural)!", "ommena": "Great try! The 'm' sound is single.", "onnena": "That sounds like 'onnena'.", "oomena": "Careful! The 'o' is short.", "omela": "So close! The middle consonant is 'n'.", "omana": "That's a real word!", "omen": "That's the English word 'omen'.", "omenan": "Perfect genitive case!", "omenassa": "Flawless grammar!", "umena": "Good effort! The first sound is 'o'.", "omenaiva": "That's a creative guess!", "onema": "The 'm' and 'n' are switched!", "omenae": "A classic English speaker mistake!", "emona": "You missed the first letter!", "omppu": "Aha! You found the slang word!", "ihana": "That means 'wonderful'!" } },
+                { "correct": "Porkkana", "translation": "Carrot", "mistakes": { "porkana": "Great effort!", "borkkana": "You're almost there!", "purkkana": "Watch out for that first vowel!", "porkkanna": "So close! The 'n' is single.", "pokkana": "You missed the 'r' sound!", "poro": "Close start! 'poro' means reindeer!", "kana": "You said the last part! 'Kana' means 'chicken'.", "porkkanat": "Perfect plural!", "porkkanaa": "Excellent partitive case!", "porkkanan": "You said 'carrot's'.", "poorkkana": "The 'o' sound is short.", "porkkala": "Watch out for the last consonant!", "porgana": "This is a double mistake!", "parkkana": "It sounds like 'parka'.", "kurkkuna": "Tricky! That means 'as a cucumber'.", "peruna": "That's 'potato'!", "porkkana in": "It sounds like you're adding an English word.", "gorggala": "Let's work on the sounds.", "porgand": "That's Estonian!", "morot": "That means 'hi'!" } },
+                { "correct": "Vesimeloni", "translation": "Watermelon", "mistakes": { "vesimeloni": "That's it! Perfect!", "vesimelon": "You got all the hard parts!", "visimeloni": "Excellent try! The first vowel is 'e'.", "wesimeloni": "You're saying it beautifully!", "meloni": "You got half of it! 'Meloni' is 'melon'.", "vesi": "That's the first part, 'water'.", "vesimelonia": "Perfect grammar!", "vesimelonit": "You said 'watermelons' (plural)!", "melonivesi": "A clever guess! Wrong order.", "vesimelooni": "Careful with the length!", "vesimelona": "Almost! The word ends with 'i'.", "vasimeloni": "So close! It's 've', not 'va'.", "vesimelone": "The ending should be a sharp 'i'.", "fesimeloni": "Good try! It's a 'v' sound.", "vesimelonin": "You've got the genitive case.", "vesimeloniassa": "That's an interesting combination.", "vesimelo": "You started strong but didn't finish!", "vesimuna": "That's a funny mix! 'Water-egg'!", "siemen": "That means 'seed'!", "vesimeloniemi": "A creative ending!" } }
+            ];
 
-        selectPronunciationWord(pronunciationData[0]);
+            const wordSelectionContainer = document.getElementById('word-selection');
+            const wordToSayElem = document.getElementById('word-to-say');
+            const translationElem = document.getElementById('translation');
+            const speakBtn = document.getElementById('speak-btn');
+            const recordBtn = document.getElementById('record-btn');
+            const feedbackMessageElem = document.getElementById('feedback-message');
+            let currentPronunciationWord = null;
 
-        speakBtn.addEventListener('click', () => {
-            console.log("Speak button clicked."); // DEBUG
-            if (!currentPronunciationWord) return;
-            speakFinnish(currentPronunciationWord.correct);
-        });
-
-        // --- Pronunciation Speech Recognition ---
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (SpeechRecognition) {
-            
-            console.log("SpeechRecognition API is supported!"); // DEBUG 3
-            
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'fi-FI';
-            recognition.continuous = false;
-            
-            recordBtn.addEventListener('click', () => {
-                
-                console.log("Record button clicked! Attempting to start..."); // DEBUG 4
-                
-                if (!currentPronunciationWord) {
-                    console.log("Silent exit: currentPronunciationWord is null."); // DEBUG 5
-                    return; 
+            const levenshteinDistance = (a, b) => {
+                const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+                for (let i = 0; i <= a.length; i += 1) { matrix[0][i] = i; }
+                for (let j = 0; j <= b.length; j += 1) { matrix[j][0] = j; }
+                for (let j = 1; j <= b.length; j += 1) {
+                    for (let i = 1; i <= a.length; i += 1) {
+                        const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+                        matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + indicator);
+                    }
                 }
-                
-                try { 
-                    recognition.start(); 
-                    console.log("recognition.start() called successfully."); // DEBUG 6
-                } catch(e) { 
-                    console.error("Recognition failed to start.", e); // DEBUG 7
-                }
+                return matrix[b.length][a.length];
+            };
+            
+            pronunciationData.forEach(wordObj => {
+                const btn = document.createElement('button');
+                btn.className = 'word-btn';
+                btn.textContent = wordObj.correct;
+                btn.onclick = () => selectPronunciationWord(wordObj);
+                wordSelectionContainer.appendChild(btn);
             });
 
-            recognition.onstart = () => {
-                console.log("Recognition.onstart event fired."); // DEBUG 8
-                recordBtn.classList.add('recording');
-                feedbackMessageElem.textContent = 'Listening...';
-                feedbackMessageElem.className = 'feedback listening';
-            };
+            function selectPronunciationWord(wordObj) {
+                currentPronunciationWord = wordObj;
+                wordToSayElem.textContent = wordObj.correct;
+                translationElem.textContent = `(English: ${wordObj.translation})`;
+                feedbackMessageElem.innerHTML = '';
+                feedbackMessageElem.className = 'feedback';
+                document.querySelectorAll('.word-btn').forEach(b => {
+                    b.classList.toggle('active', b.textContent === wordObj.correct);
+                });
+            }
 
-            recognition.onend = () => {
-                console.log("Recognition.onend event fired."); // DEBUG 9
-                recordBtn.classList.remove('recording');
-            };
+            selectPronunciationWord(pronunciationData[0]);
 
-            recognition.onresult = (event) => { /* ... same fuzzy logic as before ... */ 
-                console.log("Recognition.onresult event fired."); // DEBUG 10
-                const userSaid = event.results[0][0].transcript.toLowerCase().trim().replace(/[.,!?]/g, '');
-                const correctWord = currentPronunciationWord.correct.toLowerCase();
-                if (userSaid === correctWord) {
-                    feedbackMessageElem.innerHTML = 'Perfect! You got it exactly right! 🎉';
-                    feedbackMessageElem.className = 'feedback correct';
-                    return;
-                }
-                if (currentPronunciationWord.mistakes[userSaid]) {
-                    feedbackMessageElem.innerHTML = `💡 <strong>Tip:</strong> ${currentPronunciationWord.mistakes[userSaid]}`;
+            speakBtn.addEventListener('click', () => {
+                if (!currentPronunciationWord) return;
+                speakFinnish(currentPronunciationWord.correct); 
+            });
+
+            // --- Pronunciation Speech Recognition ---
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'fi-FI';
+                recognition.continuous = false;
+                
+                recordBtn.addEventListener('click', () => { 
+                    if (!currentPronunciationWord) return; 
+                    try { recognition.start(); } catch(e) { console.error("Recognition failed to start.", e); }
+                });
+
+                recognition.onstart = () => {
+                    recordBtn.classList.add('recording');
+                    feedbackMessageElem.textContent = 'Listening...';
+                    feedbackMessageElem.className = 'feedback listening';
+                };
+
+                recognition.onend = () => recordBtn.classList.remove('recording');
+
+                recognition.onresult = (event) => { 
+                    const userSaid = event.results[0][0].transcript.toLowerCase().trim().replace(/[.,!?]/g, '');
+                    const correctWord = currentPronunciationWord.correct.toLowerCase();
+                    if (userSaid === correctWord) {
+                        feedbackMessageElem.innerHTML = 'Perfect! You got it exactly right! 🎉';
+                        feedbackMessageElem.className = 'feedback correct';
+                        return;
+                    }
+                    if (currentPronunciationWord.mistakes[userSaid]) {
+                        feedbackMessageElem.innerHTML = `💡 <strong>Tip:</strong> ${currentPronunciationWord.mistakes[userSaid]}`;
+                        feedbackMessageElem.className = 'feedback incorrect';
+                        return;
+                    }
+                    let bestMatch = null, minDistance = 3;
+                    for (const mistake in currentPronunciationWord.mistakes) {
+                        const distance = levenshteinDistance(userSaid, mistake);
+                        if (distance < minDistance) { minDistance = distance; bestMatch = mistake; }
+                    }
+                    if (bestMatch) {
+                        feedbackMessageElem.innerHTML = `💡 <strong>Tip:</strong> That sounded like "<em>${userSaid}</em>". ${currentPronunciationWord.mistakes[bestMatch]}`;
+                    } else {
+                        feedbackMessageElem.innerHTML = `You said "<strong>${userSaid}</strong>". That's not quite right. Listen carefully and try again.`;
+                    }
                     feedbackMessageElem.className = 'feedback incorrect';
-                    return;
-                }
-                let bestMatch = null, minDistance = 3;
-                for (const mistake in currentPronunciationWord.mistakes) {
-                    const distance = levenshteinDistance(userSaid, mistake);
-                    if (distance < minDistance) { minDistance = distance; bestMatch = mistake; }
-                }
-                if (bestMatch) {
-                    feedbackMessageElem.innerHTML = `💡 <strong>Tip:</strong> That sounded like "<em>${userSaid}</em>". ${currentPronunciationWord.mistakes[bestMatch]}`;
-                } else {
-                    feedbackMessageElem.innerHTML = `You said "<strong>${userSaid}</strong>". That's not quite right. Listen carefully and try again.`;
-                }
-                feedbackMessageElem.className = 'feedback incorrect';
-            };
+                };
 
-            recognition.onerror = (event) => { 
-                console.error("Recognition.onerror event fired:", event.error); // DEBUG 11
-                let errorMessage = "An error occurred. Please try again.";
-                if (event.error === 'no-speech') {
-                    errorMessage = "I didn't hear anything. Try speaking a little louder!";
-                } else if (event.error === 'not-allowed') {
-                    errorMessage = "You need to allow microphone access to practice.";
-                }
-                feedbackMessageElem.textContent = errorMessage;
-                feedbackMessageElem.className = 'feedback incorrect';
-            };
-        } else {
-            
-            console.error("SpeechRecognition API is NOT supported by this browser."); // DEBUG 12
-            
-            alert("CRITICAL ERROR: Your browser does not support the Speech Recognition API. Please use Google Chrome or Microsoft Edge.");
-            if (recordBtn) {
+                recognition.onerror = (event) => { 
+                    let errorMessage = "An error occurred. Please try again.";
+                    if (event.error === 'no-speech') {
+                        errorMessage = "I didn't hear anything. Try speaking a little louder!";
+                    } else if (event.error === 'not-allowed') {
+                        errorMessage = "You need to allow microphone access to practice.";
+                    }
+                    feedbackMessageElem.textContent = errorMessage;
+                    feedbackMessageElem.className = 'feedback incorrect';
+                };
+            } else {
+                alert("Sorry, your browser doesn't support Speech Recognition. Please use Google Chrome or Microsoft Edge.");
                 recordBtn.style.display = 'none';
             }
-        }
 
-        // === 2. ACCORDION LOGIC ===
-        document.querySelectorAll('.accordion-header').forEach(header => {
-            header.addEventListener('click', () => { /* ... same as before ... */ 
-                const content = document.querySelector(header.dataset.target);
-                const wasActive = header.classList.contains('active');
-                document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
-                if (!wasActive) {
-                    content.style.display = 'block';
-                    header.classList.add('active');
+            // === 2. ACCORDION LOGIC ===
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = document.querySelector(header.dataset.target);
+                    const wasActive = header.classList.contains('active');
+                    
+                    document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+
+                    if (!wasActive) {
+                        content.style.display = 'block';
+                        header.classList.add('active');
+
+                        // **IMPROVEMENT**: Auto-play audio or focus input when opening a section
+                        if (header.dataset.target === '#dictation-content') {
+                            speakFinnish(currentDictationPhrase.correct);
+                            dictationInput.focus();
+                        } else if (header.dataset.target === '#sentence-content') {
+                            sentenceInput.focus();
+                        }
+                    }
+                });
+            });
+
+            // === 3. DICTATION DATA & LOGIC ===
+            const dictationData = [
+                {
+                    "correct": "Minä ostan omenan",
+                    "translation": "I am buying an apple",
+                    "mistakes": {
+                        "minä ostan omena": "So close! When you 'buy an apple', the object 'omena' needs the 'n' at the end. Try: ome-nan.",
+                        "mina ostan omenan": "Great sentence! Just remember the 'ä' in 'minä' has an 'aah' sound, like in 'cat'. Try: Mi-nä."
+                    }
+                },
+                {
+                    "correct": "Yksi tomaatti, kiitos",
+                    "translation": "One tomato, please",
+                    "mistakes": {
+                        "yksi tomaatti kitos": "Almost perfect! The word 'kiitos' (please/thank you) has a long 'ii' sound. Hold it a bit longer: Kiii-tos.",
+                        "yksi tomaatti kiitoks": "Careful with the ending! No 's' at the end of 'kiitos'."
+                    }
+                },
+                {
+                    "correct": "Missä porkkanat ovat?",
+                    "translation": "Where are the carrots?",
+                    "mistakes": {
+                        "missä porkkanat ovat": "Perfect spelling, well done!",
+                        "missä porkkana ovat": "Almost! Since you're asking 'where *are*', the word 'carrot' needs to be plural: 'porkkanat'.",
+                        "missa porkkanat ovat": "You forgot the special letter! 'Missä' (where) needs the 'ä' sound."
+                    }
+                },
+                {
+                    "correct": "Vesimeloni on kallis",
+                    "translation": "The watermelon is expensive",
+                    "mistakes": {
+                        "vesimeloni on kalis": "Very close! 'Expensive' is 'kallis' with two 'l's. Hold that 'l' sound."
+                    }
                 }
-            });
-        });
+            ];
 
-        // === 3. DICTATION DATA & LOGIC ===
-        const dictationData = [ /* ... same as before ... */ ];
-        // ... all other dictation code is the same ...
-        const dictationListenBtn = document.getElementById('dictation-listen-btn');
-        const dictationInput = document.getElementById('dictation-input');
-        const dictationCheckBtn = document.getElementById('dictation-check-btn');
-        const dictationFeedback = document.getElementById('dictation-feedback');
-        const dictationNextBtn = document.getElementById('dictation-next-btn');
-        let currentDictationIndex = 0;
-        let currentDictationPhrase = dictationData.length > 0 ? dictationData[currentDictationIndex] : null;
+            const dictationListenBtn = document.getElementById('dictation-listen-btn');
+            const dictationInput = document.getElementById('dictation-input');
+            const dictationCheckBtn = document.getElementById('dictation-check-btn');
+            const dictationFeedback = document.getElementById('dictation-feedback');
+            const dictationNextBtn = document.getElementById('dictation-next-btn');
 
-        if (dictationListenBtn) {
+            let currentDictationIndex = 0;
+            let currentDictationPhrase = dictationData[currentDictationIndex];
+
             dictationListenBtn.addEventListener('click', () => {
-                if (currentDictationPhrase) speakFinnish(currentDictationPhrase.correct);
+                speakFinnish(currentDictationPhrase.correct);
             });
+
             dictationCheckBtn.addEventListener('click', () => { 
-                if (!currentDictationPhrase) return;
                 const userInput = dictationInput.value.toLowerCase().trim().replace(/[.,!?]/g, '');
                 const correctText = currentDictationPhrase.correct.toLowerCase().trim().replace(/[.,!?]/g, '');
                 dictationNextBtn.style.display = 'inline-block';
@@ -330,6 +342,7 @@
                     dictationFeedback.className = 'feedback incorrect';
                 }
             });
+
             dictationNextBtn.addEventListener('click', () => { 
                 currentDictationIndex = (currentDictationIndex + 1) % dictationData.length;
                 currentDictationPhrase = dictationData[currentDictationIndex];
@@ -339,65 +352,41 @@
                 dictationNextBtn.style.display = 'none';
                 speakFinnish(currentDictationPhrase.correct);
             });
+            
             dictationInput.addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') { event.preventDefault(); dictationCheckBtn.click(); }
             });
-        }
 
-
-        // === 4. SENTENCE COMPLETION LOGIC ===
-        const sentenceData = [ /* ... same as before ... */ ];
-        // ... all other sentence completion code is the same ...
-        const sentencePromptEn = document.getElementById('sentence-prompt-en');
-        const sentencePromptFi = document.getElementById('sentence-prompt-fi');
-        const sentenceInput = document.getElementById('sentence-input');
-        const sentenceCheckBtn = document.getElementById('sentence-check-btn');
-        const sentenceFeedback = document.getElementById('sentence-feedback');
-        let currentSentenceIndex = 0;
-
-        function loadSentence(index) {
-            if (!sentenceData || sentenceData.length === 0) return;
-            const currentSentence = sentenceData[index];
-            sentencePromptEn.innerHTML = currentSentence.prompt_en;
-            sentencePromptFi.textContent = currentSentence.prompt_fi_start;
-            sentenceInput.value = '';
-            sentenceFeedback.innerHTML = '';
-            sentenceFeedback.className = 'feedback';
-            sentenceCheckBtn.disabled = false;
-            sentenceInput.disabled = false;
-            sentenceInput.focus();
-        }
-
-        if (sentenceCheckBtn) {
-            sentenceCheckBtn.addEventListener('click', () => {
-                const userInput = sentenceInput.value.toLowerCase().trim().replace(/[.,!?]/g, '');
-                const currentSentence = sentenceData[currentSentenceIndex];
-                const correctAnswer = currentSentence.correct_answer;
-                if (userInput === correctAnswer) {
-                    sentenceFeedback.innerHTML = `Oikein! (Correct!) Listening to the full sentence: <br><strong>${currentSentence.full_sentence_fi}</strong>`;
-                    sentenceFeedback.className = 'feedback correct';
-                    speakFinnish(currentSentence.full_sentence_fi);
-                    sentenceCheckBtn.disabled = true;
-                    sentenceInput.disabled = true;
-                    setTimeout(() => {
-                        currentSentenceIndex = (currentSentenceIndex + 1) % sentenceData.length;
-                        loadSentence(currentSentenceIndex);
-                    }, 2500); 
-                } else {
-                    sentenceFeedback.innerHTML = `💡 <strong>Hint:</strong> ${currentSentence.hint}`;
-                    sentenceFeedback.className = 'feedback incorrect';
-                }
-            });
-            sentenceInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') { event.preventDefault(); sentenceCheckBtn.click(); }
-            });
-            
-            // Load the first sentence
-            loadSentence(currentSentenceIndex);
-        }
-
-    });
-</script>
+            // === 4. SENTENCE COMPLETION LOGIC ===
+            const sentenceData = [
+                {
+                    prompt_en: "I am buying an <strong>apple</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "omenan",
+                    full_sentence_fi: "Minä ostan omenan",
+                    hint: "Good try! When you buy a whole 'omena', it changes to 'omenan' (accusative case)."
+                },
+                {
+                    prompt_en: "I am buying a <strong>tomato</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "tomaatin",
+                    full_sentence_fi: "Minä ostan tomaatin",
+                    hint: "Almost! 'Tomaatti' changes to 'tomaatin' in this sentence."
+                },
+                {
+                    prompt_en: "I am buying a <strong>carrot</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "porkkanan",
+                    full_sentence_fi: "Minä ostan porkkanan",
+                    hint: "Close! 'Porkkana' needs an '-n' at the end here, becoming 'porkkanan'."
+                },
+                {
+                    prompt_en: "I am buying a <strong>watermelon</strong>.",
+                    prompt_fi_start: "Minä ostan",
+                    correct_answer: "vesimelonin",
+                    full_sentence_fi: "Minä ostan vesimelonin",
+                    hint: "Nearly there! 'Vesimeloni
 </body>
 
 </html>
+
