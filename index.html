@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finnish Practice Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
+   <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         
         /* --- General Styling --- */
@@ -34,18 +34,51 @@
         #record-btn.recording { background-color: #e53e3e; animation: pulse 1.5s infinite; }
 
         /* --- 2. Dictation Section Styling --- */
-        .dictation-controls { display: flex; gap: 15px; margin-bottom: 20px; }
+        .dictation-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* <-- *** FIX #1: Added this to allow items to wrap on small screens *** */
+        }
         #dictation-listen-btn { background-color: #3182ce; color: white; font-size: 1.5rem; padding: 15px; border-radius: 50%; width: 60px; height: 60px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.2s; }
         #dictation-listen-btn:hover { background-color: #2c5282; }
-        #dictation-input { flex-grow: 1; border: 2px solid #cbd5e0; border-radius: 8px; padding: 0 15px; font-size: 1.1rem; font-family: 'Poppins', sans-serif; }
+        #dictation-input { 
+            flex-grow: 1; 
+            border: 2px solid #cbd5e0; 
+            border-radius: 8px; 
+            padding: 0 15px; 
+            font-size: 1.1rem; 
+            font-family: 'Poppins', sans-serif;
+            min-width: 150px; /* <-- Added a minimum width to prevent it from getting too small */
+        }
         #dictation-input:focus { border-color: #63b3ed; outline: none; }
         #dictation-check-btn { background-color: #38a169; color: white; border: none; border-radius: 8px; padding: 0 25px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
         #dictation-check-btn:hover { background-color: #2f855a; }
-        #dictation-next-btn { background-color: #4a5568; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: none; margin-top: 10px; float: right;}
+        
+        #dictation-next-btn {
+            background-color: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: none; /* Hidden by default */
+            margin-top: 10px;
+            
+            /* --- *** FIX #2: Replaced float: right with modern CSS *** --- */
+            display: block;
+            width: fit-content; /* Make button only as wide as its text */
+            margin-left: auto; /* Push it to the right */
+            /* float: right; */ /* <-- Removed this */
+        }
+
 
         /* --- 3. Sentence Completion Styling --- */
         #sentence-prompt-en { font-size: 1.1rem; color: #4a5568; text-align: center; margin-bottom: 20px; }
-        .sentence-build-line { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .sentence-build-line { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; } /* <-- Added wrap and justify-content */
         #sentence-prompt-fi { font-size: 1.2rem; color: #2d3748; font-weight: 600; }
         #sentence-input { border: 2px dashed #cbd5e0; border-radius: 8px; padding: 10px 15px; font-size: 1.1rem; font-family: 'Poppins', sans-serif; text-align: center; width: 150px; }
         #sentence-input:focus { border-style: solid; border-color: #63b3ed; outline: none; }
@@ -543,3 +576,4 @@
     </script>
 </body>
 </html>
+
