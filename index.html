@@ -92,6 +92,20 @@
         .feedback.listening { background-color: #bee3f8; color: #2b6cb0; text-align: center;}
         
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
+
+        /* --- 4. Rate & Reflect (small helper styles) --- */
+        .stars { display: flex; gap: 8px; justify-content: center; margin: 8px 0 10px; }
+        .star { background: #edf2f7; border: 2px solid #e2e8f0; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: transform .15s, background .15s, border-color .15s; }
+        .star:hover { transform: translateY(-1px); background: #e6f0fb; border-color: #63b3ed; }
+        .star .fa-star { font-size: 1.25rem; }
+        .star.filled i { color: #f6ad55; } /* amber */
+        .rating-stats { text-align: center; color: #4a5568; margin-bottom: 12px; }
+        #feedback-comment { width: 100%; border: 2px solid #cbd5e0; border-radius: 10px; padding: 10px 12px; font-family: 'Poppins', sans-serif; font-size: 1rem; }
+        #feedback-comment:focus { outline: none; border-color: #63b3ed; }
+        .feedback-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 10px; }
+        #submit-feedback { background-color: #2b6cb0; color: white; border: none; border-radius: 10px; padding: 10px 18px; font-weight: 600; cursor: pointer; }
+        #submit-feedback:hover { background-color: #2c5282; }
+        #submit-status { font-size: .95rem; color: #4a5568; opacity: .85; }
     </style>
 </head>
 <body>
@@ -153,57 +167,38 @@
             </div>
         </div>
 
-<!-- 4. Rate & Reflect (INLINE CSS/JS FRIENDLY) -->
+        <!-- ======================== -->
+        <!-- 4. Rate & Reflect        -->
+        <!-- ======================== -->
         <div class="accordion-section">
-          <div class="accordion-header" data-target="#feedback-content">
-            <h2>4. Rate & Reflect</h2>
-            <i class="fas fa-chevron-down icon"></i>
-          </div>
-          <div class="accordion-content" id="feedback-content">
-            <p>How much did you like this game?</p>
-
-            <div id="star-group" role="radiogroup" aria-label="Star rating"
-                 style="display:flex;gap:8px;justify-content:center;margin:8px 0 10px;">
-              <button type="button" aria-label="1 star" data-value="1"
-                      style="background:#edf2f7;border:2px solid #e2e8f0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .15s, background .15s, border-color .15s;">
-                <i class="fa-regular fa-star" style="font-size:1.25rem;"></i>
-              </button>
-              <button type="button" aria-label="2 stars" data-value="2"
-                      style="background:#edf2f7;border:2px solid #e2e8f0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .15s, background .15s, border-color .15s;">
-                <i class="fa-regular fa-star" style="font-size:1.25rem;"></i>
-              </button>
-              <button type="button" aria-label="3 stars" data-value="3"
-                      style="background:#edf2f7;border:2px solid #e2e8f0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .15s, background .15s, border-color .15s;">
-                <i class="fa-regular fa-star" style="font-size:1.25rem;"></i>
-              </button>
-              <button type="button" aria-label="4 stars" data-value="4"
-                      style="background:#edf2f7;border:2px solid #e2e8f0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .15s, background .15s, border-color .15s;">
-                <i class="fa-regular fa-star" style="font-size:1.25rem;"></i>
-              </button>
-              <button type="button" aria-label="5 stars" data-value="5"
-                      style="background:#edf2f7;border:2px solid #e2e8f0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .15s, background .15s, border-color .15s;">
-                <i class="fa-regular fa-star" style="font-size:1.25rem;"></i>
-              </button>
+            <div class="accordion-header" data-target="#feedback-content">
+                <h2>4. Rate & Reflect</h2>
+                <i class="fas fa-chevron-down icon"></i>
             </div>
+            <div class="accordion-content" id="feedback-content">
+                <p>How much did you like this game?</p>
 
-            <div style="text-align:center;color:#4a5568;margin-bottom:12px;">
-              <strong><span id="avg-rating">0.0</span>/5</strong>
-              · <span id="total-votes">0</span> votes
+                <div class="stars" id="star-group" role="radiogroup" aria-label="Star rating">
+                    <button class="star" type="button" aria-label="1 star" data-value="1"><i class="fa-regular fa-star"></i></button>
+                    <button class="star" type="button" aria-label="2 stars" data-value="2"><i class="fa-regular fa-star"></i></button>
+                    <button class="star" type="button" aria-label="3 stars" data-value="3"><i class="fa-regular fa-star"></i></button>
+                    <button class="star" type="button" aria-label="4 stars" data-value="4"><i class="fa-regular fa-star"></i></button>
+                    <button class="star" type="button" aria-label="5 stars" data-value="5"><i class="fa-regular fa-star"></i></button>
+                </div>
+
+                <div class="rating-stats">
+                    <strong><span id="avg-rating">0.0</span>/5</strong>
+                    · <span id="total-votes">0</span> votes
+                </div>
+
+                <textarea id="feedback-comment" rows="3" placeholder="Optional: What worked? What should we improve?"></textarea>
+
+                <div class="feedback-actions">
+                    <button id="submit-feedback">Submit</button>
+                    <span id="submit-status"></span>
+                </div>
             </div>
-
-            <textarea id="feedback-comment" rows="3" placeholder="Optional: What worked? What should we improve?"
-                      style="width:100%;border:2px solid #cbd5e0;border-radius:10px;padding:10px 12px;font-family:'Poppins',sans-serif;font-size:1rem;"></textarea>
-
-            <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px;">
-              <button id="submit-feedback"
-                      style="background-color:#2b6cb0;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer;">
-                Submit
-              </button>
-              <span id="submit-status" style="font-size:.95rem;color:#4a5568;opacity:.85;"></span>
-            </div>
-          </div>
         </div>
-        <!-- End Rate & Reflect -->
 
     </div>
 
@@ -573,7 +568,6 @@
             const sentencePromptFi = document.getElementById('sentence-prompt-fi');
             const sentenceInput = document.getElementById('sentence-input');
             const sentenceCheckBtn = document.getElementById('sentence-check-btn');
-            // **FIX #2: Corrected the ID name**
             const sentenceFeedback = document.getElementById('sentence-feedback'); 
 
             let currentSentenceIndex = 0;
@@ -624,9 +618,100 @@
 
             // Load the first sentence
             loadSentence(currentSentenceIndex);
+
+            // === 5. RATING & REFLECTION ===
+            const starGroup = document.getElementById('star-group');
+            const starButtons = Array.from(starGroup.querySelectorAll('button.star'));
+            const avgRatingEl = document.getElementById('avg-rating');
+            const totalVotesEl = document.getElementById('total-votes');
+            const commentEl = document.getElementById('feedback-comment');
+            const submitBtn = document.getElementById('submit-feedback');
+            const submitStatus = document.getElementById('submit-status');
+
+            const LS_KEY = 'fph_ratings_v1';   // stores array of {rating, comment, ts}
+            let selectedRating = 0;
+
+            function setStarIcon(iconEl, filled) {
+                if (filled) {
+                    iconEl.classList.remove('fa-regular');
+                    iconEl.classList.add('fa-solid');
+                } else {
+                    iconEl.classList.remove('fa-solid');
+                    iconEl.classList.add('fa-regular');
+                }
+            }
+            function paintStars(level) {
+                starButtons.forEach((btn, i) => {
+                    const icon = btn.querySelector('i');
+                    const fill = i < level;
+                    btn.classList.toggle('filled', fill);
+                    setStarIcon(icon, fill);
+                });
+            }
+
+            // Robust event delegation so hovering over the <i> or the button works
+            starGroup.addEventListener('mouseover', (e) => {
+                const btn = e.target.closest('button.star');
+                if (!btn || !starGroup.contains(btn)) return;
+                const val = Number(btn.dataset.value);
+                paintStars(val);
+            });
+            starGroup.addEventListener('mouseout', () => {
+                paintStars(selectedRating);
+            });
+            starGroup.addEventListener('click', (e) => {
+                const btn = e.target.closest('button.star');
+                if (!btn || !starGroup.contains(btn)) return;
+                selectedRating = Number(btn.dataset.value);
+                paintStars(selectedRating);
+            });
+
+            function loadAllRatings() {
+                try {
+                    const raw = localStorage.getItem(LS_KEY);
+                    return raw ? JSON.parse(raw) : [];
+                } catch { return []; }
+            }
+            function saveAllRatings(arr) {
+                localStorage.setItem(LS_KEY, JSON.stringify(arr));
+            }
+            function computeStats(arr) {
+                if (!arr.length) return { avg: 0, count: 0 };
+                const sum = arr.reduce((s, r) => s + (r.rating || 0), 0);
+                return { avg: Math.round((sum / arr.length) * 10) / 10, count: arr.length };
+            }
+            function repaintStats() {
+                const all = loadAllRatings();
+                const { avg, count } = computeStats(all);
+                avgRatingEl.textContent = avg.toFixed(1);
+                totalVotesEl.textContent = count;
+            }
+
+            submitBtn.addEventListener('click', async () => {
+                if (!selectedRating) { submitStatus.textContent = "Please choose a star rating first."; return; }
+                const payload = { rating: selectedRating, comment: commentEl.value.trim(), ts: Date.now() };
+
+                const all = loadAllRatings();
+                all.push(payload);
+                saveAllRatings(all);
+                repaintStats();
+                submitStatus.textContent = "Thanks for your feedback!";
+                commentEl.value = '';
+
+                // OPTIONAL: send to a backend
+                // try {
+                //   await fetch('https://YOUR_ENDPOINT/collect', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(payload)
+                //   });
+                // } catch (e) { console.warn('Backend submit failed (local save ok):', e); }
+            });
+
+            // Initialize
+            repaintStats();
+            paintStars(0);
         });
     </script>
 </body>
 </html>
-
-
